@@ -12,5 +12,4 @@
  */
 
 require_once( 'class-wp-mvc-admin-bar.php' );
-
-$admin_bar = new WP_MVC_Admin_Bar();
+$mvc_admin_bar = new WP_MVC_Admin_Bar(true);

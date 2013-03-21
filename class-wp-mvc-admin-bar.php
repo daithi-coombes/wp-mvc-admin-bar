@@ -15,14 +15,10 @@
  * Dependencies:
  * php < 5.3.0
  * 
- * Abstract methods:
+ * Abstract methods, called in this order:
  *  - add_menus();
- *  - admin_bar_init();
- *  - filter_set_class();
- *  - initialize();
  *  - render();
- * @uses admin_bar_init hook
- * @uses add_admin_bar_menus hook
+ *  - initialize();
  */
 class WP_MVC_Admin_Bar extends WP_Extend{
 
@@ -35,43 +31,23 @@ class WP_MVC_Admin_Bar extends WP_Extend{
 	 * Hooks, actions and filters. @see @link initialize() for construct flow.
 	 * @uses WP_Extender
 	 */
-	function __construct(){
+	function __construct( $extend=false ){
 
 		//extend the bar class
-		WP_Extend::filter('wp_admin_bar_class', __CLASS__ );
+		$this->extend_filter('wp_admin_bar_class', __CLASS__ );
 	}
 
-	function foo(){
-		return __CLASS__;
-	}
-
-	function debug(){
+	function debug($step=1){
 		$trace = debug_backtrace();
-		print "<pre>\n";
-		if($trace[1]['class'])
-			print $trace[1]['class'] . "::";
-		print $trace[1]['function']."\n";
-		print_r(func_get_args());
-		print "</pre>";
-		die();	
+		print_r($trace[$step]);
 	}
 
 	/**
 	 * Abstract method. Called in @link admin-bar.php:35
 	 * Loads actions and filters for the admin_menu
 	 */
-	public function __add_menus(){
-		$this->debug('add_menus');
-	}
-
-	public function admin_bar_init(){
+	public function add_menus(){
 		$this->debug();
-		global $wp_admin_bar;
-
-		if(!is_object($wp_admin_bar))
-			$admin_bar = new WP_Admin_Bar();
-
-		$this->debug('admin_bar_init');
 	}
 
 	/**
@@ -80,10 +56,7 @@ class WP_MVC_Admin_Bar extends WP_Extend{
 	 * @return string [description]
 	 */
 	public function initialize(){
-		$this->debug('initialize');
-		//load wp_admin_bar class
-		//require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
-		//$this->wp_admin_bar = new WP_Admin_Bar();
+		$this->debug();
 	}
 
 	/**
@@ -91,8 +64,8 @@ class WP_MVC_Admin_Bar extends WP_Extend{
 	 * Display the view file
 	 * @return [type] [description]
 	 */
-	public function __render(){
-		$this->debug('render');
+	public function render(){
+		$this->debug();
 	}
 }
 
@@ -103,20 +76,53 @@ class WP_MVC_Admin_Bar extends WP_Extend{
  */
 class WP_Extend{
 
+	/** @var string The child class name */
 	public $class_name;
+	/** @var string The parent class anme */
+	public $parent = false;
 
 	/**
-	 * Add new class to a filter
-	 * @global WP_Extender $extender;
+	 * Set the child class name using a filter.
+	 * Stores child class name in global. Filter callback @link WP_Extend::get_class() 
+	 * or if will set parent class name.
 	 * @param  string $filter The filter that sets the class
 	 * @param  string $class  The new class name
-	 * @return string         The new class name
+	 * @return void
 	 */
-	public function filter($filter, $class_name){
-		global $extender;
-		$extender->class_name = $class_name;
-		add_filter($filter, function($class){ global $extender; return $extender->class_name;});
+	public function extend_filter($filter, $class_name){
+		global $_wp_extend_modal;
+
+		//if no global ar, then define it
+		if(!is_array(@$_wp_extend_modal)){
+			$_wp_extend_modal = array();
+			if(!is_array(@$_wp_extend_modal[$class_name]))
+				$_wp_extend_modal[$class_name] = '';
+		}
+
+		//else original class defined, so construct $parent
+		else{
+			$parent = $_wp_extend_modal[$class_name];
+			$this->parent = new $parent();
+		}
+
+		//set params
+		$this->class_name = $class_name;
+		add_filter($filter, array($this, 'get_class'));
+	}
+
+	/**
+	 * Filter/hook callback.
+	 * @param  string $class The class name
+	 * @return string        The set class name
+	 */
+	public function get_class( $class ){
+		global $_wp_extend_modal;
+
+		//if callback is from wp declaration, store class name to extend in global $var
+		if($class != $this->class_name)
+			$_wp_extend_modal[$this->class_name] = $class;
+
+		//return set class name
+		return $this->class_name;
 	}
 }
-global $extender;
-$extender = new WP_Extend();
