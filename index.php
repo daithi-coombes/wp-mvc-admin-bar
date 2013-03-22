@@ -11,5 +11,6 @@
   Author URI: http://david-coombes.com
  */
 
+require_once('class-wp-extend.php');
 require_once( 'class-wp-mvc-admin-bar.php' );
 $mvc_admin_bar = new WP_MVC_Admin_Bar(true);
