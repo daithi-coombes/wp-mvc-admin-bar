@@ -67,5 +67,18 @@ if(!class_exists('WP_Extend')):
 			//return set class name
 			return $this->class_name;
 		}
+
+		/**
+		 * Use to call current method name in parent.
+		 * Will automatically pass args send to child method if none set as parameter
+		 * @param array An array of arguments to overrite params pass to child method
+		 * @return mixed returns value from calling parent method with args
+		 */
+		public function parent( $args=false ){
+			$trace = debug_backtrace()[1];
+			if(!$args)
+				$args = $trace['$args'];
+			return call_user_func_array(array(&$this->parent, $trace['function']), args);
+		}
 	}
 endif;

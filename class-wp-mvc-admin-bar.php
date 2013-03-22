@@ -45,8 +45,7 @@ class WP_MVC_Admin_Bar extends WP_Extend{
 
 	/**
 	 * Magic Method. Catch unkown methods and try parent.
-	 * If method not found pass request on to parent to check $this->parent
-	 * @param  [type] $method The method
+	 * If method not found pass request on to parent to check $this->parent()d
 	 * @param  [type] $args   Array of arguments
 	 * @return mixed returns PARENT::parent->$method( $args ) if method is found or
 	 * throws an exception if none
@@ -66,7 +65,7 @@ class WP_MVC_Admin_Bar extends WP_Extend{
 	 * Loads actions and filters for the admin_menu
 	 */
 	public function add_menus(){
-		return $this->parent->add_menus();
+		return $this->parent();
 	}
 
 	/**
@@ -125,6 +124,6 @@ class WP_MVC_Admin_Bar extends WP_Extend{
 	 * @return [type] [description]
 	 */
 	public function render(){
-		return $this->parent->render();
+		return $this->parent();
 	}
 }
