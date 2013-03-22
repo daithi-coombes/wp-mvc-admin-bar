@@ -77,8 +77,8 @@ if(!class_exists('WP_Extend')):
 		public function parent( $args=false ){
 			$trace = debug_backtrace()[1];
 			if(!$args)
-				$args = $trace['$args'];
-			return call_user_func_array(array(&$this->parent, $trace['function']), args);
+				$args = $trace['args'];
+			return call_user_func_array(array(&$this->parent, $trace['function']), $args);
 		}
 	}
 endif;
